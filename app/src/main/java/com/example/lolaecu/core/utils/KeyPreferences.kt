@@ -1,0 +1,32 @@
+package com.example.lolaecu.core.utils
+
+object KeyPreferences {
+    const val USER = "user"
+    const val VEHICLE_IMEI = "imei"
+    const val VEHICLE_ID = "vehicle"
+    const val EMPLOYEE_ID = "id"
+    const val EMPLOYEE_NAME = "name"
+    const val CARD_ID = "id_card"
+    const val PERMISSION = "permission"
+    const val ID_SERVICE = "id_service"
+    const val ID_DETAIL_SERVICE = "id_detail_service"
+    const val LATITUD = "latitude"
+    const val LONGITUD = "longitud"
+    const val ID_ROUTE = "id_route"
+    const val DATA_ASSIGNED = "data_assigned"
+    const val ROUTE_ASSIGNED = "route_assigned"
+    const val ROUTE_STATE = "route_state"
+    const val ROUTEISRUNNING = "routeIsRunning"
+    const val ROUTENETWORK = "routeNetwork"
+    const val DATAFINISHROUTE = "dataFinishRoute"
+    const val BASEURL = "baseUrl"
+    const val LOGOUT = "logout"/** "1" logout without resume route, "0" reset variable **/
+    const val INTERNAL_NUMBER = "internalNum"
+    const val EXPORT_TRANSACTIONS_TYPE = "exportTransactionsType"
+    const val ROUTE_ID = "routeId"
+    const val ROUTE_NAME = "routeName"
+    const val TIMER_MESSAGE = "timerMessage"
+    const val TECHNICAL_TYPE = "technicalType"
+    const val LOGOUT_BUTTON_STATE = "logoutButtonState"
+    const val CLEAR_TRANSACTIONS_TIME = "clearTransactionsTime"
+}

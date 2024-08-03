@@ -1,6 +1,7 @@
 package com.example.lolaecu.core.di
 
 import com.example.lolaecu.core.utils.Constants
+import com.example.lolaecu.data.network.ConfigApiClient
 import com.example.lolaecu.data.network.ContentTypeInterceptor
 import com.example.lolaecu.data.network.SaleApiClient
 import dagger.Module
@@ -38,5 +39,11 @@ object NetworkModule {
     @Provides
     fun provideSaleApiClient(retrofit: Retrofit): SaleApiClient {
         return retrofit.create(SaleApiClient::class.java)
+    }
+
+    @Singleton
+    @Provides
+    fun provideConfigApiClient(retrofit: Retrofit): ConfigApiClient {
+        return retrofit.create(ConfigApiClient::class.java)
     }
 }
