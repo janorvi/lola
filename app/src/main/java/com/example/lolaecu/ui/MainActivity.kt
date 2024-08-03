@@ -5,19 +5,31 @@ import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import androidx.activity.viewModels
+import com.example.lolaecu.core.utils.DeviceInformation
+import com.example.lolaecu.core.utils.KeyPreferences
 import com.example.lolaecu.core.utils.PermissionRequest
+import com.example.lolaecu.data.model.ConfigRequestModel
 import com.example.lolaecu.databinding.ActivityMainBinding
+import com.example.lolaecu.ui.viewmodel.ConfigViewModel
+import com.example.lolaecu.ui.viewmodel.UtilsViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
+
+    private val configViewModel: ConfigViewModel by viewModels()
+    private val utilsViewModel: UtilsViewModel by viewModels()
+
     private var requestPermission: PermissionRequest = PermissionRequest()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         requestAppPermissions()
         hideUIBars()
+        initValidatorConfigFlow()
+        utilsViewModel.getDeviceIdentifier()
         setContentView(binding.root)
     }
 
@@ -53,5 +65,18 @@ class MainActivity : AppCompatActivity() {
             systemUiVisibility =
                 View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_FULLSCREEN
         }
+    }
+
+    private fun initValidatorConfigFlow() {
+        configViewModel.initConfigFlow(
+            ConfigRequestModel(
+                imei = DeviceInformation.getDeviceId().ifBlank {
+                    /*UserApplication.prefs.getStorage(
+                        KeyPreferences.VEHICLE_IMEI
+                    )*/
+                    "868808038415581"
+                }
+            )
+        )
     }
 }

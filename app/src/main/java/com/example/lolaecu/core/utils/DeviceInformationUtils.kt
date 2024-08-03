@@ -86,6 +86,4 @@ class DeviceInformationUtils @Inject constructor(
         }
         return false
     }
-
-
 }
