@@ -1,5 +1,8 @@
 package com.example.lolaecu.data.model
 
+import com.example.lolaecu.domain.model.MakeSaleRequest
+import com.example.lolaecu.domain.model.RecDomain
+import com.example.lolaecu.domain.model.SaleRouteDomain
 import com.google.gson.annotations.SerializedName
 
 data class MakeSaleRequestModel(
@@ -48,4 +51,41 @@ data class Rec(
 data class SaleRoute(
     @SerializedName("id") var id: String = "3",
     @SerializedName("route_short_name") var routeShortName: String = "R214"
+)
+
+fun MakeSaleRequest.toModel() = MakeSaleRequestModel(
+    creditEnable = creditEnable,
+    creditUse = creditUse,
+    cur = cur,
+    date = date,
+    driver = driver,
+    employeeFullName = employeeFullName,
+    hw = hw,
+    imei = imei,
+    latitude = latitude,
+    longitude = longitude,
+    offline = offline,
+    plotId = plotId,
+    rec = rec.toModel(),
+    route = route.toModel(),
+    sat = sat,
+    spe = spe,
+    token = token,
+    transfer = transfer,
+    transactionType = transactionType,
+    vehicle = vehicle,
+    version = version
+)
+
+fun RecDomain.toModel() = Rec(
+    amount = amount,
+    balance = balance,
+    id = id,
+    idFare = idFare,
+    productId = productId,
+    recVal = recVal
+)
+
+fun SaleRouteDomain.toModel() = SaleRoute(
+    id = id, routeShortName = routeShortName
 )

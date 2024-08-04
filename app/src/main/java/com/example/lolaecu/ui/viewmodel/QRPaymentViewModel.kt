@@ -10,6 +10,7 @@ import com.example.lolaecu.core.utils.PaymentTransaction
 import com.example.lolaecu.core.utils.TransactionStatus
 import com.example.lolaecu.data.model.MakeSaleResponseModel
 import com.example.lolaecu.data.model.NetworkResult
+import com.example.lolaecu.data.model.toModel
 import com.example.lolaecu.domain.model.MakeSaleRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -75,7 +76,7 @@ class QRPaymentViewModel @Inject constructor(
     fun makeQrPayment(makePaymentRequestBody: MakeSaleRequest) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                /*when (val qrPaymentResponse =
+                when (val qrPaymentResponse =
                     qrPaymentUseCase.qrPaymentUseCase(makePaymentRequestBody.toModel())
                 ) {
                     is NetworkResult.ApiSuccess -> {
@@ -87,7 +88,7 @@ class QRPaymentViewModel @Inject constructor(
                         Log.e("qrPaymentError", qrPaymentResponse.message)
 
                     is NetworkResult.ApiException -> throw (qrPaymentResponse.e)
-                }*/
+                }
             } catch (e: Exception) {
                 Log.e("makeQrPaymentException", e.stackTraceToString())
             }

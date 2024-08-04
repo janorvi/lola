@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.lolaecu.core.utils.Configuration
+import com.example.lolaecu.core.utils.Constants
 import com.example.lolaecu.core.utils.DeviceInformation
 import com.example.lolaecu.data.model.ConfigRequestModel
 import com.example.lolaecu.data.model.ConfigResponseModel
@@ -59,8 +60,8 @@ class ConfigViewModel @Inject constructor(
                                     //testing
                                     //configResponse.data.mode = "A"
 
-                                    //configResponse.data.assign.route.routeShortName =
-                                    //    Constants.ROUTE_NAME
+                                    configResponse.data.assign.route.routeShortName =
+                                        Constants.ROUTE_NAME
 
                                     //configResponse.data.assign.route.employeeFullName = "ACONCHA RAMOS SAIR"
                                     //configResponse.data.assign.route.employeeId = 4

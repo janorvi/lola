@@ -11,10 +11,12 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import com.example.lolaecu.core.utils.Configuration
 import com.example.lolaecu.core.utils.Constants
+import com.example.lolaecu.core.utils.DateUtils
 import com.example.lolaecu.core.utils.DeviceInformation
 import com.example.lolaecu.core.utils.PermissionRequest
 import com.example.lolaecu.core.utils.TransactionStatus
 import com.example.lolaecu.data.model.ConfigResponseModel
+import com.example.lolaecu.data.model.Fares
 import com.example.lolaecu.databinding.FragmentPaymentBinding
 import com.example.lolaecu.domain.model.MakeSaleRequest
 import com.example.lolaecu.domain.model.RecDomain
@@ -60,7 +62,7 @@ class PaymentFragment : Fragment() {
         deviceModel = DeviceInformation.deviceModel
         //Init observers and methods
         //setUpUI()
-        //initListeners()
+        initListeners()
         initQRScanner()
         initLolaObservers()
         //initLibraryObservers()
@@ -94,6 +96,22 @@ class PaymentFragment : Fragment() {
             )
         } catch (e: Exception) {
             Log.e("initQRScannerException", e.stackTraceToString())
+        }
+    }
+
+    private fun getFareRate(fares: List<Fares>): String {
+        return try {
+            val dayOfWeek = DateUtils.getDayOfWeek()
+            val time = DateUtils.getTime()
+            val fare = fares.find {
+                it.days.contains(dayOfWeek)
+                        &&
+                        DateUtils.isTimeInRange(time, it.initHour, it.finishHour)
+            }
+            fare?.value ?: ""
+        } catch (e: Exception) {
+            Log.e("getFareRateException", e.stackTraceToString())
+            ""
         }
     }
 
@@ -143,6 +161,30 @@ class PaymentFragment : Fragment() {
         } catch (e: Exception) {
             Log.e("buildPaymentRequestBodyException", e.stackTraceToString())
             MakeSaleRequest()
+        }
+    }
+    private fun initListeners() {
+        try {
+            configListener()
+        } catch (e: Exception) {
+            Log.e("initListenersException", e.stackTraceToString())
+        }
+    }
+    private fun configListener() {
+        try {
+            configViewModel.configResponseLD.observe(viewLifecycleOwner) { response ->
+                Log.i("telpoConfig", "config: $response")
+
+                DateUtils.getDateInformation()
+                val fares: List<Fares> = response.assign.fare[0].fares
+                val routeRateString: String = getFareRate(fares) ?: ""
+                val routeNameString: String = response.assign.route.routeShortName ?: ""
+                configViewModel.setRouteName(routeNameString)
+                configViewModel.setPaymentRate(routeRateString)
+                //setUpUI()
+            }
+        } catch (e: Exception) {
+            Log.e("configListenerException", e.stackTraceToString())
         }
     }
 
