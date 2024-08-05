@@ -247,6 +247,43 @@ class PaymentFragment : Fragment() {
             MakeSaleRequest()
         }
     }
+    private fun setUpUI() {
+        try {
+            val configRouteName = configViewModel.routeName.value ?: "N/A"
+            val configRouteRate = configViewModel.paymentRate.value ?: "N/A"
+            binding.apply {
+                if (configRouteName.isBlank()) {
+                    noRouteScreen?.visibility = View.VISIBLE
+                    routeName.visibility = View.GONE
+                    routeNameTitle.visibility = View.GONE
+                    routeRate.visibility = View.GONE
+                    //paymentProcessingScreen?.visibility = View.GONE
+                } else if (isPaymentMethodBeingRead) {
+                    //paymentProcessingScreen?.visibility = View.VISIBLE
+                    routeName.visibility = View.GONE
+                    routeNameTitle.visibility = View.GONE
+                    routeRate.visibility = View.GONE
+                } else {
+                    if (DeviceInformation.deviceModel != Constants.TELPO_T20_DEVICE_MODEL) {
+                        barcodeView.visibility = View.VISIBLE
+                    }
+                    //paymentProcessingScreen?.visibility = View.GONE
+                    noRouteScreen?.visibility = View.GONE
+                    routeName.text = configRouteName
+                    routeRate.text = if (configRouteRate.isBlank()) {
+                        "Sin Tarifa"
+                    } else {
+                        "$${String.format("%,d", configRouteRate.toInt())}"
+                    }
+                    routeName.visibility = View.VISIBLE
+                    routeNameTitle.visibility = View.VISIBLE
+                    routeRate.visibility = View.VISIBLE
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("setUpUIException", e.stackTraceToString())
+        }
+    }
     private fun initListeners() {
         try {
             configListener()

@@ -107,24 +107,6 @@ class ConfigViewModel @Inject constructor(
         }
     }
 
-    fun updateTimeToDisplayFlow() {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                configRepository.updateTimeToDisplay.collect {
-                    if (it) {
-                        val currentDateFormat = SimpleDateFormat(
-                            "dd/MM/yy HH:mm:ss", Locale("es", "ES")
-                        )
-                        currentDateFormat.timeZone = TimeZone.getTimeZone("GMT-5")
-                        _timeToDisplay.postValue(currentDateFormat.format(Date()))
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e("updateTimeToDisplayFlowException", e.stackTraceToString())
-            }
-        }
-    }
-
     fun setPaymentRate(rate: String) {
         _paymentRate.value = rate.ifBlank {
             "0"
