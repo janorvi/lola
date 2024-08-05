@@ -27,9 +27,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         requestAppPermissions()
+        utilsViewModel.getDeviceIdentifier()
         hideUIBars()
         initValidatorConfigFlow()
-        utilsViewModel.getDeviceIdentifier()
         setContentView(binding.root)
     }
 
@@ -71,10 +71,7 @@ class MainActivity : AppCompatActivity() {
         configViewModel.initConfigFlow(
             ConfigRequestModel(
                 imei = DeviceInformation.getDeviceId().ifBlank {
-                    /*UserApplication.prefs.getStorage(
-                        KeyPreferences.VEHICLE_IMEI
-                    )*/
-                    "868808038415581"
+                    "0"
                 }
             )
         )

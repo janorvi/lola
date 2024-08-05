@@ -1,55 +1,94 @@
 package com.example.lolaecu.ui.view
 
 import android.os.Bundle
+import android.os.CountDownTimer
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.example.lolaecu.R
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
+import com.example.lolaecu.core.utils.DeviceInformation
+import com.example.lolaecu.core.utils.TransactionStatus
+import com.example.lolaecu.databinding.FragmentSuccessfulPaymentBinding
+import com.example.lolaecu.ui.viewmodel.QRPaymentViewModel
+import com.example.lolaecu.ui.viewmodel.UtilsViewModel
 
-/**
- * A simple [Fragment] subclass.
- * Use the [SuccessfulPaymentFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class SuccessfulPaymentFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            //param1 = it.getString(ARG_PARAM1)
-            //param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    private lateinit var binding: FragmentSuccessfulPaymentBinding
+    private val args: SuccessfulPaymentFragmentArgs by navArgs()
+    private val utilsViewModel: UtilsViewModel by activityViewModels()
+
+    private val qrPaymentViewModel: QRPaymentViewModel by viewModels()
+
+    private var paymentRateArg: String = ""
+    private var currentBalanceArg: String = ""
+    private var paymentMethodArg: String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_successful_payment, container, false)
+        binding = FragmentSuccessfulPaymentBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment SuccessfulPaymentFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            SuccessfulPaymentFragment().apply {
-                arguments = Bundle().apply {
-                    //putString(ARG_PARAM1, param1)
-                    //putString(ARG_PARAM2, param2)
-                }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        TransactionStatus.isTransactionInProgress = true
+        DeviceInformation.isCardBeingRead = false
+        utilsViewModel.readingPaymentMethodFinished()
+        paymentMethodArg = args.paymentMethod
+        formatPriceStrings()
+        setUpUI()
+
+        comeBackToPaymentFragment()
+    }
+
+    /** setUp view's texts (prices) **/
+    private fun setUpUI() {
+        binding.apply {
+            TVPaymentRate?.text = paymentRateArg
+            TVCurrentBalance?.text = currentBalanceArg
+        }
+    }
+
+    /** format price strings to display in the UI **/
+    private fun formatPriceStrings() {
+        try {
+            paymentRateArg = if (args.paymentRate.isBlank()) {
+                ""
+            } else {
+                "$ ${String.format("%,d", args.paymentRate.toInt())}"
             }
+
+            currentBalanceArg = if (args.currentBalance.isBlank()) {
+                ""
+            } else {
+                "$ ${String.format("%,d", args.currentBalance.toInt())}"
+            }
+        } catch (e: Exception) {
+            Log.e("formatPriceStringsException", e.stackTraceToString())
+        }
+    }
+
+    private fun comeBackToPaymentFragment() {
+        /** CountDown timer to return to paymentFragment automatically **/
+        val timer = object : CountDownTimer(3000, 1000) {
+            override fun onTick(p0: Long) {
+            }
+
+            override fun onFinish() {
+                val direction = SuccessfulPaymentFragmentDirections
+                    .actionSuccessfulPaymentFragmentToPaymentFragment()
+                findNavController().navigate(direction)
+            }
+        }
+        timer.start()
     }
 }

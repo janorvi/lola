@@ -9,6 +9,8 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.navigation.NavDirections
+import androidx.navigation.fragment.findNavController
 import com.example.lolaecu.core.utils.Configuration
 import com.example.lolaecu.core.utils.Constants
 import com.example.lolaecu.core.utils.DateUtils
@@ -36,7 +38,6 @@ class PaymentFragment : Fragment() {
     private val utilsViewModel: UtilsViewModel by activityViewModels()
     private val configViewModel: ConfigViewModel by activityViewModels()
 
-    private var imei = ""
     private var isPaymentMethodBeingRead = false
 
     //Device info
@@ -127,8 +128,89 @@ class PaymentFragment : Fragment() {
                 qrPaymentViewModel.makeQrPayment(makePaymentRequest)
             }
         }
+        //Observer that waits for the QR payment response and then navigates to
+        //the payment result fragment to display payment transaction response
+        qrPaymentViewModel.qrPaymentResponse.observe(viewLifecycleOwner) { qrPaymentResponse ->
+
+            val qrPaymentRate: String = getEmptyStringIfNull(qrPaymentResponse.data.amount)
+
+            val qrCardBalance: String =
+                getEmptyStringIfNull(qrPaymentResponse.data.balance)
+
+            navigateToPaymentResultFragment(
+                paymentMethod = Constants.QR_PAYMENT_METHOD,
+                paymentRate = qrPaymentRate,
+                currentBalance = qrCardBalance,
+                errorMessage = qrPaymentResponse.message,
+                transactionCode = qrPaymentResponse.code,
+                paymentStatus = qrPaymentResponse.status
+            )
+        }
     }
 
+    /** returns an empty string if the parameter received is null or the value as a string otherwise*/
+    private fun getEmptyStringIfNull(value: Int?): String {
+        return try {
+            when (value == null) {
+                true -> ""
+                false -> value.toString()
+            }
+        } catch (e: Exception) {
+            Log.e("getEmptyStringIfNullException", e.stackTraceToString())
+            ""
+        }
+    }
+    /** navigates to the payment result fragment with the given arguments  **/
+    private fun navigateToPaymentResultFragment(
+        paymentMethod: String,
+        paymentRate: String,
+        currentBalance: String,
+        errorMessage: String,
+        paymentStatus: String,
+        transactionCode: String
+    ) {
+        try {
+            val direction: NavDirections = when (paymentStatus) {
+                Constants.TRANSACTION_SUCCESS -> PaymentFragmentDirections
+                    .actionPaymentFragmentToSuccessfullPaymentFragment(
+                        /* paymentRate = */ paymentRate,
+                        /* currentBalance = */ currentBalance,
+                        /* paymentMethod = */ paymentMethod
+                    )
+
+                Constants.TRANSACTION_DANGER -> PaymentFragmentDirections
+                    .actionPaymentFragmentToFailurePaymentFragment(
+                        /* currentBalance = */ currentBalance,
+                        /* transactionCode = */ transactionCode,
+                        /* paymentMethod = */ paymentMethod,
+                        /* transactionMessage = */ errorMessage
+                    )
+
+                Constants.TRANSACTION_WARNING -> PaymentFragmentDirections
+                    .actionPaymentFragmentToWarningPaymentFragment(
+                        /* transactionCode = */ transactionCode,
+                        /* transactionMessage = */ errorMessage
+                    )
+
+                Constants.TRANSACTION_INFO -> PaymentFragmentDirections
+                    .actionPaymentFragmentToFailurePaymentFragment(
+                        /* currentBalance = */ currentBalance,
+                        /* transactionCode = */ transactionCode,
+                        /* paymentMethod = */ paymentMethod,
+                        /* transactionMessage = */ errorMessage
+                    )
+
+                else -> PaymentFragmentDirections
+                    .actionPaymentFragmentToWarningPaymentFragment(
+                        /* transactionCode = */ transactionCode,
+                        /* transactionMessage = */ errorMessage
+                    )
+            }
+            findNavController().navigate(direction)
+        } catch (e: Exception) {
+            Log.e("navigateToPaymentResultFragment", e.stackTraceToString())
+        }
+    }
     /** builds the payment request body for the API **/
     private fun buildPaymentRequestBody(
         token: String,
@@ -137,7 +219,9 @@ class PaymentFragment : Fragment() {
         val configuration: ConfigResponseModel = Configuration.getConfiguration()
         return try {
             MakeSaleRequest(
-                imei = imei,
+                imei = DeviceInformation.getDeviceId().ifBlank {
+                    "0"
+                },
                 rec = RecDomain(
                     amount = configViewModel.paymentRate.value ?: "",
                 ),
