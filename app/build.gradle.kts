@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.lolaecu"
-        minSdk = 24
+        minSdk = 25
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -45,6 +45,7 @@ android {
 dependencies {
 
     val hilt_version = "2.48"
+    val room_version = "2.6.1"
 
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.appcompat:appcompat:1.7.0")
@@ -72,4 +73,14 @@ dependencies {
     implementation("me.dm7.barcodescanner:zxing:1.9.13")
     implementation("com.google.zxing:core:3.4.1")
     implementation("com.journeyapps:zxing-android-embedded:4.2.0")
+
+    // Room
+    implementation("androidx.room:room-ktx:$room_version")
+    kapt("androidx.room:room-compiler:$room_version")
+
+    //Stetho
+    implementation("com.facebook.stetho:stetho-okhttp3:1.6.0")
+
+    //Selina-library
+    implementation(files("libs/MDT-debug.aar"))
 }

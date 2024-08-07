@@ -26,6 +26,7 @@ import com.example.lolaecu.domain.model.SaleRouteDomain
 import com.example.lolaecu.ui.viewmodel.ConfigViewModel
 import com.example.lolaecu.ui.viewmodel.QRPaymentViewModel
 import com.example.lolaecu.ui.viewmodel.UtilsViewModel
+import com.example.mdt.UserApplication
 import com.journeyapps.barcodescanner.DecoratedBarcodeView
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.UUID
@@ -218,10 +219,9 @@ class PaymentFragment : Fragment() {
     ): MakeSaleRequest {
         val configuration: ConfigResponseModel = Configuration.getConfiguration()
         return try {
+            val s = UserApplication.prefs.getStorage(Constants.MDT_IMEI)
             MakeSaleRequest(
-                imei = DeviceInformation.getDeviceId().ifBlank {
-                    "0"
-                },
+                imei = s,
                 rec = RecDomain(
                     amount = configViewModel.paymentRate.value ?: "",
                 ),

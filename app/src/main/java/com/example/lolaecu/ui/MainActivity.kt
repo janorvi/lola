@@ -4,16 +4,22 @@ import android.Manifest
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.activity.viewModels
+import com.example.lolaecu.core.utils.Constants
 import com.example.lolaecu.core.utils.DeviceInformation
 import com.example.lolaecu.core.utils.KeyPreferences
 import com.example.lolaecu.core.utils.PermissionRequest
 import com.example.lolaecu.data.model.ConfigRequestModel
 import com.example.lolaecu.databinding.ActivityMainBinding
 import com.example.lolaecu.ui.viewmodel.ConfigViewModel
+import com.example.lolaecu.ui.viewmodel.FramesViewModel
 import com.example.lolaecu.ui.viewmodel.UtilsViewModel
+import com.example.mdt.UserApplication
+import com.example.mdt.viewmodel.ApplicationViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -23,6 +29,10 @@ class MainActivity : AppCompatActivity() {
     private val utilsViewModel: UtilsViewModel by viewModels()
 
     private var requestPermission: PermissionRequest = PermissionRequest()
+    private val framesViewModel: FramesViewModel by viewModels()
+
+    @Inject
+    lateinit var applicationViewModel: ApplicationViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -30,7 +40,23 @@ class MainActivity : AppCompatActivity() {
         utilsViewModel.getDeviceIdentifier()
         hideUIBars()
         initValidatorConfigFlow()
+        initFlows()
         setContentView(binding.root)
+    }
+
+    private fun initFlows() {
+
+        Log.i("deviceID:", "DeviceInformation.deviceID: ${DeviceInformation.getDeviceId()}")
+        Log.i(
+            "deviceID:", "Prefs: ${
+                UserApplication.prefs.getStorage(
+                    KeyPreferences.VEHICLE_IMEI
+                )
+            }"
+        )
+
+        //F20 flow
+        framesViewModel.initF20FrameFlow()
     }
 
     private fun requestAppPermissions() {
@@ -71,7 +97,9 @@ class MainActivity : AppCompatActivity() {
         configViewModel.initConfigFlow(
             ConfigRequestModel(
                 imei = DeviceInformation.getDeviceId().ifBlank {
-                    "0"
+                    UserApplication.prefs.getStorage(
+                        Constants.MDT_IMEI
+                    )
                 }
             )
         )

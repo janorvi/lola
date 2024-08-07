@@ -14,6 +14,7 @@ import com.example.lolaecu.data.model.Fare
 import com.example.lolaecu.data.model.NetworkResult
 import com.example.lolaecu.data.repository.ConfigRepository
 import com.example.lolaecu.domain.useCases.frames.GetConfigUseCase
+import com.example.mdt.UserApplication
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -41,9 +42,6 @@ class ConfigViewModel @Inject constructor(
     private var _paymentFare: MutableLiveData<Fare> = MutableLiveData()
     val paymentFare: LiveData<Fare> = _paymentFare
 
-    private var _timeToDisplay: MutableLiveData<String> = MutableLiveData()
-    val timeToDisplay: LiveData<String> = _timeToDisplay
-
     fun initConfigFlow(configRequestBody: ConfigRequestModel) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
@@ -63,7 +61,7 @@ class ConfigViewModel @Inject constructor(
                                     configResponse.data.assign.route.routeShortName =
                                         Constants.ROUTE_NAME
 
-                                    //configResponse.data.assign.route.employeeFullName = "ACONCHA RAMOS SAIR"
+                                    configResponse.data.assign.route.employeeFullName = "ACONCHA RAMOS SAIR"
                                     //configResponse.data.assign.route.employeeId = 4
 
                                     //////////////////////////////
@@ -78,10 +76,10 @@ class ConfigViewModel @Inject constructor(
                                     Configuration.setConfiguration(configResponse.data)
 
                                     //save MDT imei in prefs
-                                    /*UserApplication.prefs.saveStorage(
+                                    UserApplication.prefs.saveStorage(
                                         Constants.MDT_IMEI,
                                         configResponse.data.assign.route.imei
-                                    )*/
+                                    )
 
                                     _configResponseLD.postValue(configResponse.data)
                                 }
