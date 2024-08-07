@@ -10,6 +10,7 @@ object Constants {
     //routeName
     const val routeName = "route_name"
     const val routeId = "routeId"
+    const val driverId = "id"
     const val LOCATION_MODE = "isSimulation"
 
     const val MDT_IMEI = "mdtImei"
@@ -32,7 +33,7 @@ object Constants {
     private const val LOLA_URL_IP = "preciso.valliu.co"
     const val LOLA_API_URL = "https://$LOLA_URL_IP/api/"
 
-    const val API_TOKEN = "v7xnNfguTtQB0oDsGREcKjeODLeyhC0ACQd6ltof"
+    const val API_TOKEN = "FOSnfNmi7AdqdJq2NOOc3rvDsFrWrHwkF4HSthaK"
 
     //Bluetooth
     const val READER_MAC_ADDRESS_CAMILO = "54:81:2D:7E:0B:98"

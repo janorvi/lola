@@ -58,10 +58,9 @@ class ConfigViewModel @Inject constructor(
                                     //testing
                                     //configResponse.data.mode = "A"
 
-                                    configResponse.data.assign.route.routeShortName =
-                                        Constants.ROUTE_NAME
+                                    //configResponse.data.assign.route.routeShortName = Constants.ROUTE_NAME
 
-                                    configResponse.data.assign.route.employeeFullName = "ACONCHA RAMOS SAIR"
+                                    //configResponse.data.assign.route.employeeFullName = "ACONCHA RAMOS SAIR"
                                     //configResponse.data.assign.route.employeeId = 4
 
                                     //////////////////////////////

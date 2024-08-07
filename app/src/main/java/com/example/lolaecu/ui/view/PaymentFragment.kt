@@ -63,7 +63,7 @@ class PaymentFragment : Fragment() {
 
         deviceModel = DeviceInformation.deviceModel
         //Init observers and methods
-        //setUpUI()
+        setUpUI()
         initListeners()
         initQRScanner()
         initLolaObservers()
@@ -253,7 +253,7 @@ class PaymentFragment : Fragment() {
             val configRouteRate = configViewModel.paymentRate.value ?: "N/A"
             binding.apply {
                 if (configRouteName.isBlank()) {
-                    noRouteScreen?.visibility = View.VISIBLE
+                    noRouteScreen?.visibility = View.INVISIBLE
                     routeName.visibility = View.GONE
                     routeNameTitle.visibility = View.GONE
                     routeRate.visibility = View.GONE
@@ -302,7 +302,7 @@ class PaymentFragment : Fragment() {
                 val routeNameString: String = response.assign.route.routeShortName ?: ""
                 configViewModel.setRouteName(routeNameString)
                 configViewModel.setPaymentRate(routeRateString)
-                //setUpUI()
+                setUpUI()
             }
         } catch (e: Exception) {
             Log.e("configListenerException", e.stackTraceToString())
