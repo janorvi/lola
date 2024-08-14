@@ -1,6 +1,7 @@
 package com.example.lolaecu.ui.view
 
 import android.Manifest
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -67,6 +68,10 @@ class PaymentFragment : Fragment() {
         initListeners()
         initQRScanner()
         initLolaObservers()
+        hideUIBars()
+        binding.dateTextView.setOnClickListener {
+            showUIBars()
+        }
         //initLibraryObservers()
         //initPorts()
         //isPaymentMethodBeingReadListener()
@@ -253,7 +258,7 @@ class PaymentFragment : Fragment() {
             val configRouteRate = configViewModel.paymentRate.value ?: "N/A"
             binding.apply {
                 if (configRouteName.isBlank()) {
-                    noRouteScreen?.visibility = View.INVISIBLE
+                    noRouteScreen?.visibility = View.VISIBLE
                     routeName.visibility = View.GONE
                     routeNameTitle.visibility = View.GONE
                     routeRate.visibility = View.GONE
@@ -324,6 +329,40 @@ class PaymentFragment : Fragment() {
             Log.e("isAvailableToProcessPaymentException", e.stackTraceToString())
             false
         }
+    }
+
+    private fun hideUIBars() {
+        val intent = Intent("android.intent.action.systemui")
+        intent.putExtra("navigation_bar", "off")
+        intent.putExtra("status_bar", "off")
+        intent.putExtra("statusbar_drop", "off")
+        intent.putExtra("qsTitle", "off")
+        requireContext().sendBroadcast(intent)
+
+        val intentkey = Intent("android.intent.action.touchkey")
+        intentkey.putExtra("recent_key", "off")
+        intentkey.putExtra("home_key", "off")
+        intentkey.putExtra("back_key", "off")
+        intentkey.putExtra("menu_key", "off")
+        intentkey.putExtra("bar_key", "off")
+        requireContext().sendBroadcast(intentkey)
+    }
+
+    private fun showUIBars() {
+        val intent = Intent("android.intent.action.systemui")
+        intent.putExtra("navigation_bar", "on")
+        intent.putExtra("status_bar", "on")
+        intent.putExtra("statusbar_drop", "on")
+        intent.putExtra("qsTitle", "on")
+        requireContext().sendBroadcast(intent)
+
+        val intentkey = Intent("android.intent.action.touchkey")
+        intentkey.putExtra("recent_key", "on")
+        intentkey.putExtra("home_key", "on")
+        intentkey.putExtra("back_key", "on")
+        intentkey.putExtra("menu_key", "on")
+        intentkey.putExtra("bar_key", "on")
+        requireContext().sendBroadcast(intentkey)
     }
 
     override fun onResume() {

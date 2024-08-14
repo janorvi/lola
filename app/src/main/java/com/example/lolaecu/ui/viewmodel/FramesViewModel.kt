@@ -25,7 +25,7 @@ class FramesViewModel @Inject constructor(
     fun initF20FrameFlow() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                applicationViewModel.runSendTransactionsCycle(5000L)
+                applicationViewModel.runSendTransactionsCycle(2000L)
                 framesRepository.frameF20Flow
                     .catch { Log.e("f20FrameFlowException", it.stackTraceToString()) }
                     .collect {

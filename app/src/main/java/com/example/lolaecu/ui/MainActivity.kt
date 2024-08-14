@@ -1,15 +1,22 @@
 package com.example.lolaecu.ui
 
 import android.Manifest
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.pm.PackageManager
+import android.location.LocationListener
+import android.location.LocationManager
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.activity.viewModels
+import androidx.core.app.ActivityCompat
 import com.example.lolaecu.core.utils.Constants
 import com.example.lolaecu.core.utils.DeviceInformation
 import com.example.lolaecu.core.utils.KeyPreferences
+import com.example.lolaecu.core.utils.KeyTransactions
 import com.example.lolaecu.core.utils.PermissionRequest
 import com.example.lolaecu.core.utils.TransactionStatus
 import com.example.lolaecu.data.model.ConfigRequestModel
@@ -47,6 +54,7 @@ class MainActivity : AppCompatActivity() {
         initFlows()
         selinaObservers()
         applicationViewModel.sendPendingTransactions("",9000)
+        getDeviceCoordinates()
         setContentView(binding.root)
     }
 
@@ -134,10 +142,12 @@ class MainActivity : AppCompatActivity() {
             //////////////////////////////////////////////////////////////////////////////
 
             applicationViewModel.servicesSAEResponse.observe(this) { service ->
-                servicesViewModel.updateGUIRouteIdById(routeID = service.data.psoRoutes.first().idRoute)
+                //servicesViewModel.updateGUIRouteIdById(routeID = service.data.psoRoutes.first().idRoute)
                 service.data.psoRoutes.forEach{ psoRoute ->
                     psoRoute.services.forEach { services ->
                         services.detailServices.forEach { detailServices ->
+                            val s = detailServices.servicePsoRouteId
+                            servicesViewModel.updateGUIRouteIdById(routeID = detailServices.servicePsoRouteId)
                             UserApplication.prefs.saveStorage(
                                 Constants.driverId, detailServices.employeeId.toString()
                             )
@@ -152,7 +162,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             applicationViewModel.configuration.observe(this) { config ->
-                applicationViewModel.runSendTransactionsCycle(5000L)
+                applicationViewModel.runSendTransactionsCycle(2000L)
             }
 
             applicationViewModel.transactionsQuantity.observe(this) {
@@ -173,5 +183,68 @@ class MainActivity : AppCompatActivity() {
                 }
             )
         )
+    }
+
+    private fun getDeviceCoordinates() {
+        try {
+            val locationManager: LocationManager = application
+                .getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+            val hasGps = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+            val hasNetwork = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+
+            val gpsLocationListener = LocationListener { location ->
+                UserApplication.prefs.saveStorage(KeyPreferences.LATITUD, location.latitude.toString())
+                UserApplication.prefs.saveStorage(KeyPreferences.LONGITUD, location.longitude.toString())
+            }
+
+            val networkLocationListener = LocationListener { location ->
+            }
+
+            if (hasGps || hasNetwork) {
+
+//                if (hasNetwork) {
+//                    locationManager.requestLocationUpdates(
+//                        /* provider = */ LocationManager.NETWORK_PROVIDER,
+//                        /* minTimeMs = */ 5000,
+//                        /* minDistanceM = */ 0F,
+//                        /* listener = */ networkLocationListener
+//                    )
+//                }
+
+                if (hasGps) {
+                    if (ActivityCompat.checkSelfPermission(
+                            this,
+                            Manifest.permission.ACCESS_FINE_LOCATION
+                        ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                            this,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                        ) != PackageManager.PERMISSION_GRANTED
+                    ) {
+                        // TODO: Consider calling
+                        //    ActivityCompat#requestPermissions
+                        // here to request the missing permissions, and then overriding
+                        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                        //                                          int[] grantResults)
+                        // to handle the case where the user grants the permission. See the documentation
+                        // for ActivityCompat#requestPermissions for more details.
+                        return
+                    }
+                    locationManager.requestLocationUpdates(
+                        /* provider = */ LocationManager.GPS_PROVIDER,
+                        /* minTimeMs = */ 5000,
+                        /* minDistanceM = */ 0F,
+                        /* listener = */ gpsLocationListener
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("getDeviceCoordinatesException", e.stackTraceToString())
+        }
+    }
+
+    override fun onDestroy() {
+        servicesViewModel.updateGUIRouteIdById(routeID = 0)
+        super.onDestroy()
     }
 }

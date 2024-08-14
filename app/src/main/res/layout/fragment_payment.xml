@@ -88,7 +88,7 @@
         android:id="@+id/zxing_barcode_scanner"
         android:layout_width="215dp"
         android:layout_height="151dp"
-        android:visibility="visible"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintHorizontal_bias="0.919"
         app:layout_constraintLeft_toLeftOf="parent"
