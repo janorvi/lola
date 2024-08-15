@@ -81,6 +81,9 @@ dependencies {
     //Stetho
     implementation("com.facebook.stetho:stetho-okhttp3:1.6.0")
 
+    //Telpo
+    implementation(files("libs/telpo_api.jar"))
+
     //Selina-library
     implementation(files("libs/MDT-debug.aar"))
 }
