@@ -278,7 +278,7 @@ class PaymentFragment : Fragment() {
                     routeRate.text = if (configRouteRate.isBlank()) {
                         "Sin Tarifa"
                     } else {
-                        "$${String.format("%,d", configRouteRate.toInt())}"
+                        "$${String.format("%.2f", configRouteRate.toDouble())}"
                     }
                     routeName.visibility = View.VISIBLE
                     routeNameTitle.visibility = View.VISIBLE
