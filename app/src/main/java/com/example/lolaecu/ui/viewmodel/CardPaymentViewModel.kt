@@ -8,15 +8,18 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.lolaecu.core.utils.CardBlocks
 import com.example.lolaecu.core.utils.Configuration
+import com.example.lolaecu.core.utils.Constants
 import com.example.lolaecu.core.utils.DateUtils
 import com.example.lolaecu.core.utils.DeviceInformation
 import com.example.lolaecu.core.utils.DeviceInformationUtils
+import com.example.lolaecu.core.utils.PaymentResponseBuilder
 import com.example.lolaecu.core.utils.PaymentTransaction
 import com.example.lolaecu.core.utils.RtpUtils
 import com.example.lolaecu.core.utils.TransactionStatus
 import com.example.lolaecu.core.utils.cardBalanceInformation
 import com.example.lolaecu.core.utils.cardCreditEnableInformation
 import com.example.lolaecu.core.utils.cardCreditUseInformation
+import com.example.lolaecu.core.utils.cardExpirationDateInformation
 import com.example.lolaecu.core.utils.cardLastRouteValidatedInformation
 import com.example.lolaecu.core.utils.cardLastValidatorSerialInformation
 import com.example.lolaecu.core.utils.cardProfileInformation
@@ -30,13 +33,30 @@ import com.example.lolaecu.data.model.Fare
 import com.example.lolaecu.data.model.Fares
 import com.example.lolaecu.data.model.MakeSaleResponseModel
 import com.example.lolaecu.data.model.NetworkResult
+import com.example.lolaecu.data.model.OnlineCardPaymentUseCase
 import com.example.lolaecu.data.model.Transhipments
 import com.example.lolaecu.data.repository.FramesRepository
 import com.example.lolaecu.data.repository.NFCRepository
+import com.example.lolaecu.data.repository.TransactionRepository
 import com.example.lolaecu.domain.model.MakeSaleRequest
+import com.example.lolaecu.domain.model.MakeSaleResponse
+import com.example.lolaecu.domain.model.toDomain
 import com.example.lolaecu.domain.useCases.card.GetCardBalanceUseCase
+import com.example.lolaecu.domain.useCases.card.GetCardCreditEnableUseCase
+import com.example.lolaecu.domain.useCases.card.GetCardExpirationDateUseCase
+import com.example.lolaecu.domain.useCases.card.GetCardLastRouteValidatedUseCase
+import com.example.lolaecu.domain.useCases.card.GetCardLastValidatorSerialUseCase
+import com.example.lolaecu.domain.useCases.card.GetCardProfileUseCase
+import com.example.lolaecu.domain.useCases.card.GetCardRtpUseCase
+import com.example.lolaecu.domain.useCases.card.GetCardStatusUseCase
+import com.example.lolaecu.domain.useCases.card.GetCardTranshipmentTimeUseCase
+import com.example.lolaecu.domain.useCases.card.GetCardTranshipmentUseCase
 import com.example.lolaecu.domain.useCases.card.GetCardUidUseCase
+import com.example.lolaecu.domain.useCases.card.GetCardUsedCreditUseCase
 import com.example.lolaecu.domain.useCases.card.ReadCardBlocksUseCase
+import com.example.lolaecu.domain.useCases.card.WriteCardTranshipmentUseCase
+import com.example.lolaecu.domain.useCases.card.WriteCardUseCreditUseCase
+import com.example.lolaecu.domain.useCases.transactions.ResendTransactionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -47,15 +67,9 @@ class CardPaymentViewModel @Inject constructor(
     private val getCardUidUseCase: GetCardUidUseCase,
     private val nfcRepository: NFCRepository,
     private val onlineCardPaymentUseCase: OnlineCardPaymentUseCase,
-    private val offlineCardPaymentUseCase: OfflineCardPaymentUseCase,
-    private val nxpNFCLib: NxpNfcLib,
-    private val deleteTransactionUseCase: DeleteTransactionUseCase,
     private val transactionRepository: TransactionRepository,
     private val resendTransactionUseCase: ResendTransactionUseCase,
-    private val getAllTransactionsUseCase: GetAllTransactionsUseCase,
     private val framesRepository: FramesRepository,
-    private val reverseOfflineCardPaymentBalanceUseCase: ReverseOfflineCardPaymentBalanceUseCase,
-    private val reversePaymentUseCase: ReversePaymentUseCase,
     private val getCardBalanceUseCase: GetCardBalanceUseCase,
     private val readCardBlocksUseCase: ReadCardBlocksUseCase,
     private val getCardRtpUseCase: GetCardRtpUseCase,
@@ -83,8 +97,6 @@ class CardPaymentViewModel @Inject constructor(
 
     private var _isCardBeingReadLD: MutableLiveData<Boolean> = MutableLiveData(false)
     val isCardBeingRead: LiveData<Boolean> = _isCardBeingReadLD
-
-    val nxpLib = nxpNFCLib
 
     /** Flow that executes the card reading implementation every n seconds **/
     fun initCardReadingFlow(intent: Intent) {
@@ -288,7 +300,7 @@ class CardPaymentViewModel @Inject constructor(
     private fun isTranshipmentRouteAndTimeValidByCardProfile(
         cardProfile: String,
         cardRtp: String,
-        greenListItem: GreenList
+        //greenListItem: GreenList
     ): Boolean {
         return try {
 
@@ -305,19 +317,19 @@ class CardPaymentViewModel @Inject constructor(
 //                block13 = mockCardTranshipment
             ).toInt()
 
-            val greenListRtp: String = greenListItem.rtp
+            //val greenListRtp: String = greenListItem.rtp
 
             //Get the information from the most updated rtp (card or GL)
             var mostUpdatedShortRtp: String
             var mostUpdatedTranshipmentEnabled: Int
 
-            if (cardRtp.toLong() >= greenListRtp.toLong()) {
+            //if (cardRtp.toLong() >= greenListRtp.toLong()) {
                     mostUpdatedShortRtp = cardRtp
                     mostUpdatedTranshipmentEnabled = cardTranshipment
-            } else {
+            /*} else {
                     mostUpdatedShortRtp = RtpUtils.convertLongToShortRTP(greenListRtp)
                     mostUpdatedTranshipmentEnabled = greenListItem.pc
-            }
+            }*/
 
             Log.i("validateTranshipment", "cardTranshipment: $cardTranshipment")
 
@@ -368,7 +380,7 @@ class CardPaymentViewModel @Inject constructor(
     private suspend fun processCreditPaymentIfValid(
         cardPaymentRequestBody: MakeSaleRequest,
         cardRtp: Long,
-        greenListItem: GreenList
+        //greenListItem: GreenList
     ) {
         try {
             /** 7) evaluate validator network status **/
@@ -409,7 +421,7 @@ class CardPaymentViewModel @Inject constructor(
                     //validates if the credit is valid
                     val isCreditOfflineValid = isCreditOfflineValid(
                         cardRtp = cardRtp,
-                        greenListItem = greenListItem
+                        //greenListItem = greenListItem
                     )
                     Log.i("validateCredit", "isCreditOfflineValid $isCreditOfflineValid")
 
@@ -427,7 +439,7 @@ class CardPaymentViewModel @Inject constructor(
                         //process the payment as online or offline depending on configurations
                         when (!DeviceInformation.isTransactionsOffline) {
                             false -> makeOnlinePayment(cardPaymentRequestBody)
-                            true -> makeOfflinePayment(cardPaymentRequestBody)
+                            true -> makeOnlinePayment(cardPaymentRequestBody)
                         }
                     } else { //
                         //post no balance payment response since credit was not valid (either
@@ -471,12 +483,12 @@ class CardPaymentViewModel @Inject constructor(
      * payment may be processed, otherwise verifies credit enable on GL **/
     private suspend fun isCreditOfflineValid(
         cardRtp: Long,
-        greenListItem: GreenList
+        //greenListItem: GreenList
     ): Boolean {
         return try {
             val block12: String = CardBlocks.block12
-            val greenListShortRtp: Long = RtpUtils.convertLongToShortRTP(greenListItem.rtp).toLong()
-            val greenListCreditEnable: Int = greenListItem.credit
+            //val greenListShortRtp: Long = RtpUtils.convertLongToShortRTP(greenListItem.rtp).toLong()
+            //val greenListCreditEnable: Int = greenListItem.credit
 
             /** 8) evaluate card credit enabled **/
             /** 9) evaluate card credit use **/
@@ -496,11 +508,11 @@ class CardPaymentViewModel @Inject constructor(
             Log.i("validateCredit", "cardCreditUse $cardCreditUse")
             Log.i("validateCredit", "cardCreditEnable $cardCreditEnable")
             Log.i("validateCredit", "cardRtp $cardRtp")
-            Log.i("validateCredit", "greenListShortRtp $greenListShortRtp")
-            Log.i("validateCredit", "greenListCreditEnable $greenListCreditEnable")
+            //Log.i("validateCredit", "greenListShortRtp $greenListShortRtp")
+            //Log.i("validateCredit", "greenListCreditEnable $greenListCreditEnable")
 
             //validates the greater RTP between card's and GL's
-            if (cardRtp >= greenListShortRtp) {
+            /*if (cardRtp >= greenListShortRtp) {
 
                 //validate card credit use and credit enable
                 validateCardCredit(
@@ -510,7 +522,8 @@ class CardPaymentViewModel @Inject constructor(
             } else {
                 //if the GL's RTP is higher then validates if the card credit is enabled on the GL
                 greenListCreditEnable == 1
-            }
+            }*/
+            return true
         } catch (e: Exception) {
             Log.e("isCreditOfflineValidException", e.stackTraceToString())
             return false
@@ -738,7 +751,7 @@ class CardPaymentViewModel @Inject constructor(
                         isTranshipmentRouteAndTimeValidByCardProfile(
                             cardProfile = cardProfile,
                             cardRtp = cardRtp,
-                            greenListItem = greenListItem
+                            //greenListItem = greenListItem
                         )
 
                     //if it's transhipment and it's valid, set the transhipment's rate as the payment rate
@@ -755,12 +768,12 @@ class CardPaymentViewModel @Inject constructor(
                         processCreditPaymentIfValid(
                             cardPaymentRequestBody = cardPaymentRequestBody,
                             cardRtp = cardRtp.toLong(),
-                            greenListItem = greenListItem
+                            //greenListItem = greenListItem
                         )
                     } else { //else the card has enough balance to process regular payment
                         when (!DeviceInformation.isTransactionsOffline) {
                             false -> makeOnlinePayment(cardPaymentRequestBody)
-                            //true -> makeOfflinePayment(cardPaymentRequestBody)
+                            true -> makeOnlinePayment(cardPaymentRequestBody)
                         }
                     }
                 }
