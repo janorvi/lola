@@ -24,6 +24,7 @@ import com.example.lolaecu.databinding.FragmentPaymentBinding
 import com.example.lolaecu.domain.model.MakeSaleRequest
 import com.example.lolaecu.domain.model.RecDomain
 import com.example.lolaecu.domain.model.SaleRouteDomain
+import com.example.lolaecu.ui.viewmodel.CardPaymentViewModel
 import com.example.lolaecu.ui.viewmodel.ConfigViewModel
 import com.example.lolaecu.ui.viewmodel.QRPaymentViewModel
 import com.example.lolaecu.ui.viewmodel.UtilsViewModel
@@ -36,6 +37,7 @@ import java.util.UUID
 class PaymentFragment : Fragment() {
 
     private lateinit var barcodeView: DecoratedBarcodeView
+    private val cardPaymentViewModel: CardPaymentViewModel by viewModels()
     private val qrPaymentViewModel: QRPaymentViewModel by viewModels()
     private val utilsViewModel: UtilsViewModel by activityViewModels()
     private val configViewModel: ConfigViewModel by activityViewModels()
@@ -75,7 +77,7 @@ class PaymentFragment : Fragment() {
         //initLibraryObservers()
         //initPorts()
         //isPaymentMethodBeingReadListener()
-        //initFlows()
+        initFlows()
     }
 
     private fun initTransactionVariables() {
@@ -278,7 +280,7 @@ class PaymentFragment : Fragment() {
                     routeRate.text = if (configRouteRate.isBlank()) {
                         "Sin Tarifa"
                     } else {
-                        "$${String.format("%,d", configRouteRate.toInt())}"
+                        "$${String.format("%.2f", configRouteRate.toDouble())}"
                     }
                     routeName.visibility = View.VISIBLE
                     routeNameTitle.visibility = View.VISIBLE
@@ -363,6 +365,10 @@ class PaymentFragment : Fragment() {
         intentkey.putExtra("menu_key", "on")
         intentkey.putExtra("bar_key", "on")
         requireContext().sendBroadcast(intentkey)
+    }
+
+    private fun initFlows() {
+        cardPaymentViewModel.initCardReadingFlow(Intent())
     }
 
     override fun onResume() {
