@@ -19,7 +19,7 @@ class FramesRepository @Inject constructor(
     val frameF20Flow: Flow<Int> = flow {
         while (true) {
             emit(1)
-            delay(4000L)
+            delay(10000L)
         }
     }
         .flowOn(Dispatchers.IO)

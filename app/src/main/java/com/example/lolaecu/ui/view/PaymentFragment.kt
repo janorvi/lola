@@ -68,7 +68,7 @@ class PaymentFragment : Fragment() {
         initListeners()
         initQRScanner()
         initLolaObservers()
-        hideUIBars()
+        //hideUIBars()
         binding.dateTextView.setOnClickListener {
             showUIBars()
         }
