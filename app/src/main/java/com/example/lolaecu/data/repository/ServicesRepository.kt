@@ -8,7 +8,6 @@ import com.example.mdt.UserApplication
 import com.example.mdt.model.ServiceModel
 import com.example.mdt.model.ServicePost
 import com.example.mdt.viewmodel.ApplicationViewModel
-import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
