@@ -136,6 +136,16 @@ class PaymentFragment : Fragment() {
                 qrPaymentViewModel.makeQrPayment(makePaymentRequest)
             }
         }
+        //Observer that waits for a card UID and then process a payment
+        cardPaymentViewModel.paymentCardUID.observe(viewLifecycleOwner) { cardUID ->
+            if (isAvailableToProcessPayment()) {
+                val makePaymentRequest = buildPaymentRequestBody(
+                    token = cardUID,
+                    paymentMethod = Constants.CARD_PAYMENT_METHOD
+                )
+                cardPaymentViewModel.makeCardPayment(makePaymentRequest)
+            }
+        }
         //Observer that waits for the QR payment response and then navigates to
         //the payment result fragment to display payment transaction response
         qrPaymentViewModel.qrPaymentResponse.observe(viewLifecycleOwner) { qrPaymentResponse ->
