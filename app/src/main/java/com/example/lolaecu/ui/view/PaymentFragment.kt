@@ -70,7 +70,7 @@ class PaymentFragment : Fragment() {
         initListeners()
         initQRScanner()
         initLolaObservers()
-        hideUIBars()
+        //hideUIBars()
         binding.dateTextView.setOnClickListener {
             showUIBars()
         }
@@ -162,6 +162,25 @@ class PaymentFragment : Fragment() {
                 errorMessage = qrPaymentResponse.message,
                 transactionCode = qrPaymentResponse.code,
                 paymentStatus = qrPaymentResponse.status
+            )
+        }
+
+        //Observer that waits for the card payment response and then navigates to
+        //the payment result fragment to display payment transaction response
+        cardPaymentViewModel.cardPaymentResponse.observe(viewLifecycleOwner) { cardPaymentResponse ->
+            val cardPaymentRate: String = cardPaymentResponse.data.amount.toString()
+//                    getEmptyStringIfNull(cardPaymentResponse.data.amount)
+
+            val cardPaymentBalance: String = cardPaymentResponse.data.balance.toString()
+//                    getEmptyStringIfNull(cardPaymentResponse.data.balance)
+
+            navigateToPaymentResultFragment(
+                paymentMethod = Constants.CARD_PAYMENT_METHOD,
+                paymentRate = cardPaymentRate,
+                currentBalance = cardPaymentBalance,
+                errorMessage = cardPaymentResponse.message,
+                transactionCode = cardPaymentResponse.code,
+                paymentStatus = cardPaymentResponse.status
             )
         }
     }

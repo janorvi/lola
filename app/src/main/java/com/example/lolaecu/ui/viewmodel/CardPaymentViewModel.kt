@@ -292,8 +292,8 @@ class CardPaymentViewModel @Inject constructor(
     /** get the card transhipment rate from configuration fares **/
     private fun getTranshipmentPaymentRate(
         cardFares: Fares
-    ): Int {
-        return cardFares.transshipmentPay
+    ): Double {
+        return cardFares.transshipmentPay.toDouble()
     }
 
     /** validate if transaction is a transhipment and if it's valid **/
@@ -728,7 +728,7 @@ class CardPaymentViewModel @Inject constructor(
                 PaymentTransaction.setPaymentTransaction(cardPaymentRequestBody)
 
                 //setting payment rate and getting card balance
-                var paymentRateInt = cardPaymentRequestBody.rec.amount.toInt()
+                var paymentRateInt = cardPaymentRequestBody.rec.amount.toDouble()
 
                 //Mock card balance
                 val cardBalanceInt: Int = mostUpdatedBalance
