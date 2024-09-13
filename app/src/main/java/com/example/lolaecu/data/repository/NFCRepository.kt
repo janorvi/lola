@@ -100,7 +100,7 @@ class NFCRepository @Inject constructor(
                 //}
             }
             nfcManagerTPS530.close()
-            DeviceInformation.isCardBeingRead = false
+            //DeviceInformation.isCardBeingRead = false
             cardInformationToReturn
         } catch (e: TimeoutException) {
             nfcManagerTPS530.close()

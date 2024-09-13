@@ -45,6 +45,7 @@ android {
 dependencies {
 
     implementation(files("libs\\telpo_api.jar"))
+    implementation(files("libs\\telpo_api.jar"))
     val hilt_version = "2.48"
     val room_version = "2.6.1"
 
