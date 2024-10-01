@@ -19,7 +19,8 @@ data class ConfigResponseModel(
     @SerializedName("rb_card_reader") var rbCardReader: Int = 0,
     @SerializedName("hash") var hash: String = "",
     @SerializedName("tit") val timeForTranshipment: Int = 0,
-    @SerializedName("ctype") val ctype: Int = 0
+    @SerializedName("ctype") val ctype: Int = 0,
+    @SerializedName("config") val hardwareConfiguration: HardwareConfiguration = HardwareConfiguration()
 )
 
 data class Route(
@@ -106,4 +107,23 @@ data class Stop(
     @SerializedName("short_name") var shortName: String = "",
     @SerializedName("id") var id: Int = 0,
     @SerializedName("geodata") var geodata: ArrayList<Geodata> = arrayListOf()
+)
+
+data class HardwareConfiguration(
+    @SerializedName("turning_turnstille") var turningTurnstille: Boolean = false,
+    @SerializedName("mtto") var mtto: String = "",
+    @SerializedName("apn") var apn: String = "",
+    @SerializedName("cameras") var cameras: ArrayList<Camera> = arrayListOf()
+)
+
+data class Camera(
+    @SerializedName("ip_apc") val apcIp: String = "",
+    @SerializedName("port_apc") val apcPort: Int = 0,
+    @SerializedName("usr_apc") val apcUser: String = "",
+    @SerializedName("psw_apc") val apcPassword: String = "",
+    @SerializedName("type") val apcType: String = "",
+    @SerializedName("door") val doorId: Int = 0,
+    @SerializedName("model") val apcModel: String = "",
+    @SerializedName("url") val apcUrl: String = "",
+    @SerializedName("polling_apc") val apcPolling: Long = 0
 )

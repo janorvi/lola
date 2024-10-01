@@ -1,5 +1,6 @@
 package com.example.lolaecu.ui.viewmodel
 
+import android.os.Environment
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -15,13 +16,14 @@ import com.example.lolaecu.data.model.NetworkResult
 import com.example.lolaecu.data.repository.ConfigRepository
 import com.example.lolaecu.domain.useCases.frames.GetConfigUseCase
 import com.example.mdt.UserApplication
+import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import java.util.TimeZone
+import java.io.BufferedWriter
+import java.io.File
+import java.io.FileWriter
+import java.util.Calendar
 import javax.inject.Inject
 
 @HiltViewModel
@@ -74,6 +76,8 @@ class ConfigViewModel @Inject constructor(
                                     //Stores the latest configuration on a helper Object
                                     Configuration.setConfiguration(configResponse.data)
 
+                                    saveHardwareConfiguration(Gson().toJson(configResponse.data.hardwareConfiguration))
+
                                     //save MDT imei in prefs
                                     UserApplication.prefs.saveStorage(
                                         Constants.MDT_IMEI,
@@ -117,5 +121,69 @@ class ConfigViewModel @Inject constructor(
 
     fun setPaymentFare(routeFare: Fare) {
         _paymentFare.value = routeFare
+    }
+
+    fun saveHardwareConfiguration(configuration: String) {
+        val c = Calendar.getInstance()
+
+        //val texto = "[$anoActual-$mesActual-$diaMesActual $horaActual:$minutoActual:$segundoActual] - [$tipoMensajeAGuardar] - Mensaje: $mensajeAGuardar"
+
+        val texto = configuration
+
+        val externalStorageDir = File(Environment.getExternalStorageDirectory().absolutePath)
+        val fileName: String = "configuration.txt"
+
+        // crear la carpate si no existe
+        val statement = externalStorageDir.exists() && externalStorageDir.isDirectory
+        if (!statement) {
+            // do something here
+            externalStorageDir.mkdirs()
+        }
+
+        // crear el archivo de texto si no existe
+        val myFile = File(externalStorageDir.absolutePath, fileName)
+        if (!myFile.exists()) {
+            try {
+                myFile.createNewFile()
+            } catch (e: Exception) {
+                println("Error al crear el archivo: ${e.message}")
+            }
+        } else {
+            // si el archivo existe verificar el tamaño que tiene que no vaya a superar 1MB
+            val tamanoArchivo = myFile.length() / 1000
+            val tamanoMaximo = 10485
+            if (tamanoArchivo >= tamanoMaximo) {
+                //renombrar archivo
+                val pathArchivoAntiguo = myFile.absolutePath
+                val pathNuevo = pathArchivoAntiguo.substring(0, pathArchivoAntiguo.lastIndexOf(".txt"))
+                var numeroArchivoNuevo = 1
+                var archivoNuevo = File("$pathNuevo$numeroArchivoNuevo.txt")
+                while (archivoNuevo.exists()) {
+                    //si el archivo nuevo no existe renombrar el archivo actual por uno nuevo
+                    numeroArchivoNuevo += 1
+                    archivoNuevo = File("$pathNuevo$numeroArchivoNuevo.txt")
+                }
+                val renombrarExitoso = myFile.renameTo(archivoNuevo)
+                if (renombrarExitoso) {
+                    // se renombro satisfactoriamente el archivo
+                    println("Archivo $pathArchivoAntiguo renombrado con exito")
+                } else {
+                    // hubo un error al renombrar el archivo
+                    println("Error al renombrar el archivo $pathArchivoAntiguo en el metodo savelog de la clase MainActivity")
+                }
+            }
+        }
+
+        // escribir en el archivo de texto
+        try {
+            //para escribir al final del archivo
+            val fileWritter = FileWriter(myFile, false)
+            val bufferWritter = BufferedWriter(fileWritter)
+            bufferWritter.write(texto)
+            bufferWritter.close()
+        } catch (e: Exception) {
+            println("Error al escribir en el archivo: ${e.message}")
+        }
+        //------------------------------------------------------------------------------------------
     }
 }

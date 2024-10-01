@@ -8,7 +8,7 @@ import retrofit2.http.POST
 
 interface ConfigApiClient {
 
-    @POST("v1/config-telpo")
+    @POST("v2/config-telpo")
     suspend fun getConfig(
         @Body configRequestBody: ConfigRequestModel
     ): Response<ConfigResponseModel>
