@@ -24,6 +24,15 @@ class FramesRepository @Inject constructor(
     }
         .flowOn(Dispatchers.IO)
 
+    /** F20 frame Flow **/
+    val updatePendingTransactionsFlow: Flow<Int> = flow {
+        while (true) {
+            emit(1)
+            delay(1000L)
+        }
+    }
+        .flowOn(Dispatchers.IO)
+
     suspend fun sendSelinaFrame(frameType: String) {
         val configuration = Configuration.getConfiguration()
 

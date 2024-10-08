@@ -28,9 +28,11 @@ import com.example.lolaecu.ui.viewmodel.ConfigViewModel
 import com.example.lolaecu.ui.viewmodel.QRPaymentViewModel
 import com.example.lolaecu.ui.viewmodel.UtilsViewModel
 import com.example.mdt.UserApplication
+import com.example.mdt.viewmodel.ApplicationViewModel
 import com.journeyapps.barcodescanner.DecoratedBarcodeView
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.UUID
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class PaymentFragment : Fragment() {
@@ -39,6 +41,9 @@ class PaymentFragment : Fragment() {
     private val qrPaymentViewModel: QRPaymentViewModel by viewModels()
     private val utilsViewModel: UtilsViewModel by activityViewModels()
     private val configViewModel: ConfigViewModel by activityViewModels()
+
+    @Inject
+    lateinit var applicationViewModel: ApplicationViewModel
 
     private var isPaymentMethodBeingRead = false
 
@@ -72,6 +77,7 @@ class PaymentFragment : Fragment() {
         binding.dateTextView.setOnClickListener {
             showUIBars()
         }
+
         //initLibraryObservers()
         //initPorts()
         //isPaymentMethodBeingReadListener()
@@ -151,6 +157,14 @@ class PaymentFragment : Fragment() {
                 transactionCode = qrPaymentResponse.code,
                 paymentStatus = qrPaymentResponse.status
             )
+        }
+
+        applicationViewModel.transactionsQuantity.observe(viewLifecycleOwner) {
+            binding.totalFramesTextView.text = "$it"
+        }
+
+        applicationViewModel.transactionsPendingQuantity.observe(viewLifecycleOwner) {
+            binding.pendingFramesTextView.text = "$it"
         }
     }
 

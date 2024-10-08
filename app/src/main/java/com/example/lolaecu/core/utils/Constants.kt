@@ -30,7 +30,7 @@ object Constants {
     const val NXP_LIBRARY_KEY = "f4a19a1cd0dc00693ea4da785cef71f9"
 //    private const val LOLA_URL_IP = "api-validator-v1.valliu.co"
 
-    private const val LOLA_URL_IP = "preciso.valliu.co"
+    private const val LOLA_URL_IP = "quito.valliu.co"
     const val LOLA_API_URL = "https://$LOLA_URL_IP/api/"
 
     const val API_TOKEN = "FOSnfNmi7AdqdJq2NOOc3rvDsFrWrHwkF4HSthaK"

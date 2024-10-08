@@ -16,6 +16,7 @@ import com.example.lolaecu.data.model.NetworkResult
 import com.example.lolaecu.data.repository.ConfigRepository
 import com.example.lolaecu.domain.useCases.frames.GetConfigUseCase
 import com.example.mdt.UserApplication
+import com.example.mdt.viewmodel.ApplicationViewModel
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -29,7 +30,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ConfigViewModel @Inject constructor(
     private val configRepository: ConfigRepository,
-    private val getConfigUseCase: GetConfigUseCase
+    private val getConfigUseCase: GetConfigUseCase,
+    private val applicationViewModel: ApplicationViewModel
 ) : ViewModel() {
 
     private var _configResponseLD: MutableLiveData<ConfigResponseModel> = MutableLiveData()
@@ -43,6 +45,9 @@ class ConfigViewModel @Inject constructor(
 
     private var _paymentFare: MutableLiveData<Fare> = MutableLiveData()
     val paymentFare: LiveData<Fare> = _paymentFare
+
+    var previousHardwareConfiguration = ""
+    var currentHardwareConfiguration = ""
 
     fun initConfigFlow(configRequestBody: ConfigRequestModel) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -76,7 +81,14 @@ class ConfigViewModel @Inject constructor(
                                     //Stores the latest configuration on a helper Object
                                     Configuration.setConfiguration(configResponse.data)
 
-                                    saveHardwareConfiguration(Gson().toJson(configResponse.data.hardwareConfiguration))
+                                    currentHardwareConfiguration = Gson().toJson(configResponse.data.hardwareConfiguration)
+
+                                    if(previousHardwareConfiguration != currentHardwareConfiguration){
+                                        Log.i("updateConfiguration", "Update configuration")
+                                        applicationViewModel.createHubTransaction("HUB", "setHardwareConfig", currentHardwareConfiguration)
+                                        previousHardwareConfiguration = currentHardwareConfiguration
+                                    }
+                                    //saveHardwareConfiguration(Gson().toJson(configResponse.data.hardwareConfiguration))
 
                                     //save MDT imei in prefs
                                     UserApplication.prefs.saveStorage(

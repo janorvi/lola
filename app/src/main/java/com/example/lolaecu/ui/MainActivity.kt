@@ -102,6 +102,9 @@ class MainActivity : AppCompatActivity() {
 
         //F20 flow
         framesViewModel.initF20FrameFlow()
+
+        //Update pending transactions flow
+        framesViewModel.updatePendingTransactionsFlow()
     }
 
     private fun requestAppPermissions() {
@@ -162,11 +165,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             applicationViewModel.configuration.observe(this) { config ->
-                applicationViewModel.runSendTransactionsCycle(2000L)
-            }
-
-            applicationViewModel.transactionsQuantity.observe(this) {
-                TransactionStatus.noSyncronizedFrames = "$it"
+                applicationViewModel.runSendTransactionsCycle(1500L)
             }
 
         } catch (e: Exception) {

@@ -25,7 +25,7 @@ class FramesViewModel @Inject constructor(
     fun initF20FrameFlow() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                applicationViewModel.runSendTransactionsCycle(2000L)
+                applicationViewModel.runSendTransactionsCycle(1500L)
                 framesRepository.frameF20Flow
                     .catch { Log.e("f20FrameFlowException", it.stackTraceToString()) }
                     .collect {
@@ -45,6 +45,25 @@ class FramesViewModel @Inject constructor(
                     }
             } catch (e: Exception) {
                 Log.e("sendF20FrameException", e.stackTraceToString())
+            }
+        }
+    }
+
+    fun updatePendingTransactionsFlow() {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                framesRepository.updatePendingTransactionsFlow
+                    .catch { Log.e("updatePendingTransactionsFlowException", it.stackTraceToString()) }
+                    .collect {
+                        try {
+                            applicationViewModel.getTransactionsQuantityByState(false)
+                            applicationViewModel.getTransactionsQuantity()
+                        } catch (e: Exception) {
+                            Log.e("updatePendingTransactionsFlowCollectException", e.stackTraceToString())
+                        }
+                    }
+            } catch (e: Exception) {
+                Log.e("updatePendingTransactionsFlowException", e.stackTraceToString())
             }
         }
     }
